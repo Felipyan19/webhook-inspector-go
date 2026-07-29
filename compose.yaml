@@ -1,0 +1,11 @@
+services:
+  webhook-inspector:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - webhook-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  webhook-data:
