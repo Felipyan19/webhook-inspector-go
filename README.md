@@ -61,12 +61,22 @@ The request appears instantly in the browser.
 ## Architecture
 
 ```mermaid
-flowchart LR
-    A[External service] -->|HTTP webhook| B[Go server]
-    B --> C[(SQLite)]
-    B -->|SSE| D[Live dashboard]
-    D -->|Replay| E[Target application]
+flowchart TD
+    U[Developer] -->|1. Creates endpoint| API[Hookscope Go server]
+    API -->|2. Returns unique URL| U
+    X[External service] -->|3. Sends HTTP webhook| API
+    API -->|4. Stores request| DB[(SQLite)]
+    API -->|5. Pushes event via SSE| UI[Live dashboard]
+    DB -->|Loads event history| UI
+    UI -->|6. Requests replay| API
+    API -->|7. Forwards original request| T[Target application]
 ```
+
+1. A developer creates an endpoint and receives a unique webhook URL.
+2. An external service sends a request to that URL.
+3. The Go server captures the method, headers, query parameters, and body.
+4. SQLite stores the event while SSE pushes it to the dashboard in real time.
+5. The developer can replay the captured request to a public target application.
 
 The project intentionally uses the Go standard library for HTTP routing,
 embedded static assets, streaming, and outbound requests. SQLite is accessed
